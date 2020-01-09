@@ -4,6 +4,15 @@ module Sequel
   module Redshift
     include Postgres
 
+    class Dataset < Postgres::Dataset
+
+      # Redshift doesn't support RETURNING statement
+      def insert_returning_sql(sql)
+        # do nothing here
+        sql
+      end
+    end
+
     class Database < Postgres::Database
       set_adapter_scheme :redshift
 
@@ -17,15 +26,11 @@ module Sequel
         # redshift doesn't support serial type
         super.merge(serial: false)
       end
-    end
 
-    class Dataset < Postgres::Dataset
-      Database::DatasetClass = self
+      private
 
-      # Redshift doesn't support RETURNING statement
-      def insert_returning_sql(sql)
-        # do nothing here
-        sql
+      def dataset_class_default
+        Sequel::Redshift::Dataset
       end
     end
   end
